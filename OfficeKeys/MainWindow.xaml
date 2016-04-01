@@ -1,0 +1,78 @@
+﻿<Window x:Class="OfficeKeys.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:OfficeKeys"
+        mc:Ignorable="d"
+        Title="Office Product Keys Loader" Height="600" Width="650">
+
+    <Window.Resources>
+        <local:WeightConverter x:Key="WeightConverter" />
+        <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <local:IsLoggedToVisibilityConverter x:Key="IsLoggedToVisibilityConverter" />
+    </Window.Resources>
+
+    <Window.DataContext>
+        <local:KeysLoaderViewModel />
+    </Window.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Margin="5">
+                <Run FontWeight="Bold" FontSize="14" Text="{Binding UserName}" />
+                <!--<Run Text="(" /><Run Text="{Binding MicrosoftAccount}" /><Run Text=")" />-->
+            </TextBlock>
+            <!--<TextBox Name="Cookies" Text="{Binding Cookies}" Margin="5" />-->
+            <Button Grid.Column="1" Content="Login" Command="{Binding LoginCommand}" FontSize="12" Margin="5" Padding="5" Visibility="{Binding UserName, Converter={StaticResource IsLoggedToVisibilityConverter}, ConverterParameter='1'}" />
+        </Grid>
+
+        <ListView Margin="5" Grid.Row="1" Grid.IsSharedSizeScope="True" ItemsSource="{Binding Products}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="ProductName" />
+                            <ColumnDefinition Width="Auto" SharedSizeGroup="ProductAdded" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Margin="3,3,5,3" Text="{Binding Name}" />
+                        <TextBlock Grid.Column="1" Margin="3,3,5,3" Text="{Binding Added}" TextAlignment="Right" />
+                        <TextBlock Grid.Column="3" Margin="3" Text="{Binding Key}" HorizontalAlignment="Right" FontFamily="Courier New" FontWeight="{Binding IsNew, Converter={StaticResource WeightConverter}}">
+                            <TextBlock.InputBindings>
+                                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding Path=DataContext.CopyKeyCommand, RelativeSource={RelativeSource AncestorType=ListView}}" CommandParameter="{Binding}" />
+                            </TextBlock.InputBindings>
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <ProgressBar Margin="10" Grid.Row="1" Minimum="0" Maximum="100" Name="pbStatus" Visibility="{Binding IsLoadingInProgress, Converter={StaticResource BooleanToVisibilityConverter}}" IsIndeterminate="True" Height="30" />
+
+        <Grid Grid.Row="2" Visibility="{Binding UserName, Converter={StaticResource IsLoggedToVisibilityConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="Reload product keys" Command="{Binding RefreshKeysCommand}" Padding="5" Margin="5" />
+                <Button Grid.Column="1" Content="Add new product" Command="{Binding AddProductCommand}" Padding="5" Margin="5" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
